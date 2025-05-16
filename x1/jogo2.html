@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X1   </title>
+    <link rel="shortcut icon" href="apple-touch-icon.png" type="image/x-icon">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000; 
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+
+        #menu {
+            display: flex; 
+            width: 80%; 
+            max-width: 900px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            transition: opacity 1s ease-in-out;
+        }
+
+        .logo-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-right: 20px; 
+        }
+
+        #gameLogo {
+            max-width: 100%;
+            max-height: 150px; 
+            border-radius: 10px; 
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); 
+        }
+
+        .menu-container {
+            flex: 2; 
+            padding-left: 20px; 
+            text-align: center; 
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+        }
+
+        .option-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .character-option, .background-option {
+            width: 100px;
+            height: 100px;
+            border-radius: 15px;
+            border: 3px solid transparent;
+            background-color: #555;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .character-option:hover, .background-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        .character-option.selected, .background-option.selected {
+            background-color: #6c7b8b;
+            border-color: #1f3c43;
+        }
+
+        .button-container {
+            margin-top: 30px;
+        }
+
+        .button-container button {
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #3498db, #9b59b6);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background-color 0.4s ease-in-out, transform 0.2s ease-in-out;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .button-container button:hover {
+            background-color: #8e44ad;
+            transform: scale(1.1);
+        }
+ 
+#gameCanvas {
+    display: none; 
+    width: 100vw; 
+    height: 100vh; 
+    object-fit: contain; 
+}
+    </style>
+</head>
+<body>
+
+<div id="menu" class="animated-background">
+    <div class="logo-container">
+        <img id="gameLogo" src="ChatGPT Image 28 de abr. de 2025, 14_52_54.png" alt="Logo do Jogo">
+    </div>
+    <div class="menu-container">
+        <h1>Vamos jogar<br>Escolha seus personagens e fundo do jogo</h1>
+        <div class="option-container">
+            <div class="character-option" id="redFire" onclick="selectCharacter('red', 'fire')">
+                <img src="ChatGPT Image 26 de abr. de 2025, 22_47_23.png" alt="Guerreiro de Fogo" width="60" height="60">
+            </div>
+            <div class="character-option" id="redIce" onclick="selectCharacter('red', 'ice')">
+                <img src="ChatGPT Image 26 de abr. de 2025, 22_58_26.png" alt="Mago de Gelo" width="60" height="60">
+            </div>
+    
+        </div>
+
+        <div class="option-container">
+            <div class="character-option" id="blueFire" onclick="selectCharacter('blue', 'fire')">
+                <img src="ChatGPT Image 26 de abr. de 2025, 22_47_23.png" alt="Guerreiro de Fogo" width="60" height="60">
+            </div>
+            <div class="character-option" id="blueIce" onclick="selectCharacter('blue', 'ice')">
+                <img src="ChatGPT Image 26 de abr. de 2025, 22_58_26.png" alt="Mago de Gelo" width="60" height="60">
+            </div>
+
+        </div>
+
+        <div class="option-container">
+            <div class="background-option" id="forest" onclick="selectBackground('forest')">
+                Floresta
+            </div>
+            <div class="background-option" id="desert" onclick="selectBackground('desert')">
+                Deserto
+            </div>
+            <div class="background-option" id="city" onclick="selectBackground('city')">
+                Cidade
+            </div>
+            <div class="background-option" id="space" onclick="selectBackground('space')">
+                Espaço
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button onclick="startGame()">Começar</button>
+        </div>
+    </div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<audio id="battleMusic" src="https://cdn.pixabay.com/audio/2022/07/26/audio_0e0a51e23a.mp3" autoplay loop></audio>
+
+<script>
+const menuDiv = document.getElementById('menu');
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let backgroundChoice = '';
+let redHero = new Image();
+let blueHero = new Image();
+let redDirection = 1; 
+let blueDirection = -1; 
+
+
+let backgroundFloresta = new Image();
+backgroundFloresta.src = 'https://img.freepik.com/vetores-gratis/cena-da-floresta-com-varias-arvores-da-floresta_1308-58384.jpg?t=st=1745866806~exp=1745870406~hmac=5c210b992edeeead829c93b3dc9d26fe3f1370a93876609e95ab016c149a3b71&w=1800'; // Coloque aqui o caminho para a imagem do espaço
+
+let backgroundDeserto = new Image();
+backgroundDeserto.src = 'https://img.freepik.com/vetores-gratis/paisagem-de-floresta-vazia-no-deserto-com-cena-do-por-do-sol_1308-59134.jpg?t=st=1745867029~exp=1745870629~hmac=bda898172a6b02b674971f02cb4fb873adde6da5b959bff529b7b6949a2dd25e&w=1800'; // Coloque aqui o caminho para a imagem do deserto
+
+let backgroundCidade = new Image();
+backgroundCidade.src = 'https://img.freepik.com/vetores-gratis/horizonte-da-cidade-vista-urbana-de-fundo-no-horario-de-verao_107791-9101.jpg?t=st=1745867314~exp=1745870914~hmac=874affb2238256663b644d516230760e4a7c06aba1f41f4842996b0c2f93f184&w=1380'; // Coloque aqui o caminho para a imagem da cidade
+
+let backgroundEspaco = new Image();
+backgroundEspaco.src = 'https://img.freepik.com/vetores-gratis/fundo-de-desenho-animado-de-jogo-de-planeta-espacial-alienigena-roxo_107791-19696.jpg?t=st=1745867452~exp=1745871052~hmac=16344df3f71ad261f197047565261ff687b993008b6adb83c2db5c42cf740f33&w=1380'; // Coloque aqui o caminho para a imagem do espaço
+
+let currentBackground; 
+let redHeroLoaded = false;
+let blueHeroLoaded = false;
+let backgroundFlorestaLoaded = false;
+let backgroundDesertoLoaded = false;
+let backgroundCidadeLoaded = false;
+let backgroundEspacoLoaded = false;
+
+redHero.onload = () => {
+    console.log('Imagem do herói vermelho carregada.');
+    redHeroLoaded = true;
+    tryStartGame(); 
+};
+
+blueHero.onload = () => {
+    console.log('Imagem do herói azul carregada.');
+    blueHeroLoaded = true;
+    tryStartGame(); 
+};
+
+backgroundFloresta.onload = () => {
+    console.log('Imagem da floresta carregada.');
+    backgroundFlorestaLoaded = true;
+    tryStartGame();
+};
+backgroundDeserto.onload = () => {
+    console.log('Imagem do deserto carregada.');
+    backgroundDesertoLoaded = true;
+    tryStartGame();
+};
+backgroundCidade.onload = () => {
+    console.log('Imagem da cidade carregada.');
+    backgroundCidadeLoaded = true;
+    tryStartGame();
+};
+backgroundEspaco.onload = () => {
+    console.log('Imagem do espaço carregada.');
+    backgroundEspacoLoaded = true;
+    tryStartGame();
+};
+backgroundFloresta.onerror = () => {
+    console.error('Erro ao carregar a imagem da floresta.');
+};
+
+backgroundCidade.onerror = () => {
+    console.error('Erro ao carregar a imagem da cidade.');
+};
+
+backgroundEspaco.onerror = () => {
+    console.error('Erro ao carregar a imagem do espaço.');
+};
+let keys = {};
+let selectedRedCharacter = '';
+let selectedBlueCharacter = '';
+let selectedBackground = '';
+
+
+function selectCharacter(player, type) {
+    if (player === 'red') {
+        selectedRedCharacter = type;
+        document.getElementById('redFire').classList.remove('selected');
+        document.getElementById('redIce').classList.remove('selected');
+        document.getElementById(`red${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('selected');
+        console.log(`Personagem Vermelho selecionado: ${selectedRedCharacter}`);
+    } else {
+        selectedBlueCharacter = type;
+        document.getElementById('blueFire').classList.remove('selected');
+        document.getElementById('blueIce').classList.remove('selected');
+        document.getElementById(`blue${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('selected');
+        console.log(`Personagem Azul selecionado: ${selectedBlueCharacter}`);
+    }
+}
+
+
+function selectBackground(type) {
+    selectedBackground = type;
+    const backgrounds = ['forest', 'desert', 'city', 'space'];
+    backgrounds.forEach(bg => {
+        if (bg === type) {
+            document.getElementById(bg).classList.add('selected');
+        } else {
+            document.getElementById(bg).classList.remove('selected');
+        }
+    });
+    console.log(`Background selecionado: ${selectedBackground}`);
+}
+
+
+function startGame() {
+
+    if (selectedRedCharacter === 'fire') {
+        redHero.src = 'ChatGPT Image 26 de abr. de 2025, 22_47_23.png'; 
+    } else if (selectedRedCharacter === 'ice') {
+        redHero.src = 'ChatGPT Image 26 de abr. de 2025, 22_58_26.png'; 
+    }
+
+    if (selectedBlueCharacter === 'fire') {
+        blueHero.src = 'ChatGPT Image 26 de abr. de 2025, 22_47_23.png'; 
+    } else if (selectedBlueCharacter === 'ice') {
+        blueHero.src = 'ChatGPT Image 26 de abr. de 2025, 22_58_26.png'; 
+    }
+
+
+    if (selectedBackground === 'forest') {
+        currentBackground = backgroundFloresta;
+        console.log('Background selecionado para carregar: Floresta');
+    } else if (selectedBackground === 'desert') {
+        currentBackground = backgroundDeserto;
+        console.log('Background selecionado para carregar: Deserto');
+    } else if (selectedBackground === 'city') {
+        currentBackground = backgroundCidade;
+        console.log('Background selecionado para carregar: Cidade');
+    } else if (selectedBackground === 'space') {
+        currentBackground = backgroundEspaco;
+        console.log('Background selecionado para carregar: Espaço');
+    } else {
+        console.log('Nenhum background selecionado.');
+        currentBackground = null; 
+    }
+
+    menuDiv.style.opacity = '0'; 
+    setTimeout(() => {
+    menuDiv.style.display = 'none';
+    canvas.style.display = 'block';
+
+    const originalWidth = 800;
+    const originalHeight = 400;
+    const aspectRatio = originalWidth / originalHeight;
+
+    function resizeCanvas() {
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const windowAspectRatio = windowWidth / windowHeight;
+
+        if (windowAspectRatio > aspectRatio) {
+            canvas.height = windowHeight;
+            canvas.width = windowHeight * aspectRatio;
+        } else {
+            canvas.width = windowWidth;
+            canvas.height = windowWidth / aspectRatio;
+        }
+        resetGame();
+        draw();
+    }
+
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    tryStartGame();
+}, 1000);
+}
+function tryStartGame() {
+    if (redHeroLoaded && blueHeroLoaded &&
+        ((selectedBackground === 'forest' && backgroundFlorestaLoaded) || selectedBackground !== 'forest') &&
+        ((selectedBackground === 'desert' && backgroundDesertoLoaded) || selectedBackground !== 'desert') &&
+        ((selectedBackground === 'city' && backgroundCidadeLoaded) || selectedBackground !== 'city') &&
+        ((selectedBackground === 'space' && backgroundEspacoLoaded) || selectedBackground !== 'space')) {
+        console.log('Todas as imagens necessárias carregadas. Iniciando o jogo.');
+        update();
+    } else {
+        console.log('Aguardando o carregamento das imagens...');
+    }
+}
+
+
+let redX = 100, redY = 300, redSpeed = 5, redJumping = false, redJumpHeight = 0;
+let blueX = 600, blueY = 300, blueSpeed = 5, blueJumping = false, blueJumpHeight = 0;
+let redHealth = 100, blueHealth = 100;
+let redIsAttacking = false, blueIsAttacking = false;
+let bullets = [];
+let powerUps = [];
+
+function movePlayer() {
+    const characterWidth = 50; 
+
+ 
+    if (keys['a']) {
+        if (redX > 0) { 
+            redX -= redSpeed;
+            redDirection = 1; 
+        }
+    } else if (keys['d']) {
+        if (redX < canvas.width - characterWidth) { 
+            redX += redSpeed;
+            redDirection = -1; 
+        }
+    }
+
+    if (keys['ArrowLeft']) {
+        if (blueX > 0) { 
+            blueX -= blueSpeed;
+            blueDirection = 1;
+        }
+    } else if (keys['ArrowRight']) {
+        if (blueX < canvas.width - characterWidth) { 
+            blueX += blueSpeed;
+            blueDirection = -1; 
+        }
+    }
+
+    if (keys['w'] && !redJumping) jump('red');
+    if (keys['q'] && !redIsAttacking) shoot('red');
+    if (keys['ArrowUp'] && !blueJumping) jump('blue');
+    if (keys['Enter'] && !blueIsAttacking) shoot('blue');
+}
+
+function jump(player) {
+  if (player === 'red') {
+    redJumping = true;
+    redJumpHeight = 15; 
+  } else {
+    blueJumping = true;
+    blueJumpHeight = 15; 
+  }
+}
+
+function shoot(player) {
+    const bulletOffset = 55; 
+
+    if (player === 'red') {
+        redIsAttacking = true;
+        bullets.push({
+            x: redX + (redDirection === 1 ? -5 :bulletOffset), 
+            y: redY + 25,
+            color: 'yellow',
+            direction: -redDirection
+        });
+        setTimeout(() => redIsAttacking = false, 500);
+    } else {
+        blueIsAttacking = true;
+        bullets.push({
+            x: blueX + (blueDirection === 1 ? -5 : bulletOffset), 
+            y: blueY + 25,
+            color: 'yellow',
+            direction: -blueDirection
+        });
+        setTimeout(() => blueIsAttacking = false, 500);
+    }
+}
+
+function gravity() {
+    const groundHeight = 50;
+    const groundY = canvas.height - groundHeight;
+    const characterHeight = 50; 
+
+    if (redJumping) {
+        redY -= redJumpHeight;
+        redJumpHeight -= 1;
+        if (redY + characterHeight > groundY) {
+            redJumping = false;
+            redY = groundY - characterHeight;
+        }
+    } else if (redY + characterHeight < groundY) {
+       
+        redY += 5; 
+        if (redY + characterHeight > groundY) {
+            redY = groundY - characterHeight;
+        }
+    }
+
+    if (blueJumping) {
+        blueY -= blueJumpHeight;
+        blueJumpHeight -= 1;
+        if (blueY + characterHeight > groundY) {
+            blueJumping = false;
+            blueY = groundY - characterHeight;
+        }
+    } else if (blueY + characterHeight < groundY) {
+       
+        blueY += 5; 
+        if (blueY + characterHeight > groundY) {
+            blueY = groundY - characterHeight;
+        }
+    }
+}
+function checkCollisions() {
+  bullets.forEach((bullet, index) => {
+    if (bullet.direction === 1 && bullet.x >= blueX && bullet.x <= blueX + 50 && bullet.y >= blueY && bullet.y <= blueY + 50) {
+      blueHealth -= 20;
+      bullets.splice(index, 1);  
+    }
+    if (bullet.direction === -1 && bullet.x >= redX && bullet.x <= redX + 50 && bullet.y >= redY && bullet.y <= redY + 50) {
+      redHealth -= 20;  
+      bullets.splice(index, 1);  
+    }
+  });
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+
+    if (currentBackground) {
+        ctx.drawImage(currentBackground, 0, 0, canvas.width, canvas.height);
+    } else {
+        ctx.fillStyle = '#333';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+
+    const redBarWidth = 200;
+    const redBarHeight = 25;
+    const redBarX = 20;
+    const redBarY = 20;
+    const redHealthPercentage = redHealth / 100;
+    const redCurrentWidth = redBarWidth * redHealthPercentage;
+    let redBarColor = 'green';
+    if (redHealthPercentage < 0.5) {
+        redBarColor = 'yellow';
+    }
+    if (redHealthPercentage < 0.25) {
+        redBarColor = 'red';
+    }
+
+    ctx.fillStyle = '#555';
+    ctx.fillRect(redBarX, redBarY, redBarWidth, redBarHeight);
+
+    ctx.fillStyle = redBarColor;
+    ctx.fillRect(redBarX, redBarY, redCurrentWidth, redBarHeight);
+
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(redBarX, redBarY, redBarWidth, redBarHeight);
+
+
+    const blueBarWidth = 200;
+    const blueBarHeight = 25;
+    const blueBarX = canvas.width - 220;
+    const blueBarY = 20;
+    const blueHealthPercentage = blueHealth / 100;
+    const blueCurrentWidth = blueBarWidth * blueHealthPercentage;
+    let blueBarColor = 'green';
+    if (blueHealthPercentage < 0.5) {
+        blueBarColor = 'yellow';
+    }
+    if (blueHealthPercentage < 0.25) {
+        blueBarColor = 'red';
+    }
+
+    ctx.fillStyle = '#555';
+    ctx.fillRect(blueBarX, blueBarY, blueBarWidth, blueBarHeight);
+
+    ctx.fillStyle = blueBarColor;
+    ctx.fillRect(blueBarX, blueBarY, blueCurrentWidth, blueBarHeight);
+
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(blueBarX, blueBarY, blueBarWidth, blueBarHeight);
+
+ 
+    ctx.save();
+    ctx.translate(redX + (redDirection === -1 ? 50 : 0), redY);
+    ctx.scale(redDirection, 1);
+    ctx.drawImage(redHero, 0, 0, 85, 85);
+    ctx.restore();
+
+
+    ctx.save();
+    ctx.translate(blueX + (blueDirection === -1 ? 50 : 0), blueY);
+    ctx.scale(blueDirection, 1);
+    ctx.drawImage(blueHero, 0, 0, 85, 85);
+    ctx.restore();
+
+
+    bullets.forEach(bullet => {
+        ctx.fillStyle = bullet.color;
+        ctx.fillRect(bullet.x, bullet.y, 20, 10);
+        bullet.x += bullet.direction * 10;
+    });
+
+    if (redHealth <= 0 || blueHealth <= 0) {
+        endGame();
+    }
+}
+
+function endGame() {
+  let winner = redHealth <= 0 ? 'Azul' : 'Vermelho';
+  alert(winner + ' venceu!');
+  resetGame();
+}
+
+function resetGame() {
+    redHealth = 100;
+    blueHealth = 100;
+    redX = 100;
+    blueX = 600;
+    const groundHeight = 50;
+    const characterHeight = 50;
+    redY = canvas.height - groundHeight - characterHeight;
+    blueY = canvas.height - groundHeight - characterHeight;
+    bullets = [];
+}
+
+function update() {
+  movePlayer();
+  gravity();
+  checkCollisions();
+  draw();
+  requestAnimationFrame(update); 
+}
+
+
+window.addEventListener('keydown', (e) => {
+  keys[e.key] = true;
+});
+
+window.addEventListener('keyup', (e) => {
+  keys[e.key] = false;
+});
+</script>
+
+</body>
+</html>

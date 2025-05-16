@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PUEBLOESTRELADO!</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="apple-touch-icon.png" type="image/x-icon">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #2a9fda;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2vh 5vw;
+    }
+
+    img {
+      width: 100%;
+      max-width: 600px;
+      height: auto;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      object-fit: contain;
+    }
+
+    button {
+      padding: 1em 2em;
+      font-size: 1.2rem;
+      background-color: #c7d925;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+      max-width: 90%;
+    }
+
+    button:hover {
+      background-color: #b29816;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 768px) {
+      button {
+        font-size: 1rem;
+        padding: 0.8em 1.5em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      img {
+        max-width: 100%;
+      }
+
+      button {
+        width: 100%;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <img src="WhatsApp Image 2025-04-28 at 23.46.30-Photoroom.png" alt="Imagem do Jogo">
+  <button onclick="window.location.href='jogo.html'">Bora Jogar</button>
+</body>
+</html>
